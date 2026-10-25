@@ -1,0 +1,9 @@
+# Base OS prep for all cluster nodes - stops short of kubeadm init/join,
+# since that depends on choices (CNI, pod CIDR) not yet decided.
+- name: Kubernetes node prerequisites
+  hosts: k8s_cluster
+  become: true
+  roles:
+    - setup-linux-for-k8s
+
+

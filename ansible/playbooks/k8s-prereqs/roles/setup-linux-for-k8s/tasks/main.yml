@@ -1,0 +1,3 @@
+---
+- import_tasks: disable-swap.yml
+- import_tasks: setup-iptables-for-flannel-cni.yml

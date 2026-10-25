@@ -1,0 +1,10 @@
+- name: Disable swap
+  command: swapoff -a
+  when: ansible_swaptotal_mb > 0
+
+# Look for something like "/dev/sda2 none swap sw 0 0"
+- name: Remove swap entries from file system table
+  lineinfile:
+    path: /etc/fstab
+    regexp: '^\S+\s+\S+\s+swap\s+'    #text [whitespace] text [whitespace] "swap" [whitespace]
+    state: absent

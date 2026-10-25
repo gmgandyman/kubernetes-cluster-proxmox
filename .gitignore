@@ -1,0 +1,28 @@
+### IntelliJ IDEA ###
+.idea
+
+### Mac OS ###
+.DS_Store
+
+### OpenTofu / Terraform ###
+.terraform/
+.terraform.lock.hcl
+*.tfstate
+*.tfstate.*
+*.tfplan
+terraform.tfvars
+infra/proxmox/terraform.tfvars
+
+### Ansible ###
+*.retry
+
+### Toolbox / secrets ###
+toolbox/.env
+keys/**
+!keys/**/.gitkeep
+*-ed25519
+*-ed25519.pub
+
+### Packer build output (qcow2s, VM state, etc.) - keep the directory via .gitkeep ###
+packer/output/*
+!packer/output/.gitkeep

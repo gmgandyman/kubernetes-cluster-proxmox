@@ -1,0 +1,2 @@
+# Windows CRLF's do not play nice with SSH
+* test=auto eol=lf

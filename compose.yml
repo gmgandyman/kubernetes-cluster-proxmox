@@ -1,0 +1,10 @@
+services:
+  toolbox:
+    container_name: k8s-proxmox-toolbox
+    profiles: [tools]  # setting a profile prevents this from running on up -d
+    build: ./toolbox
+    image: k8s-proxmox-toolbox
+    env_file: toolbox/.env   # exports every KEY=VALUE as real env vars inside the container; gitignored, copy from .env.example
+    volumes:
+      - .:/work   # the whole project is mounted here, so tofu/ansible state changes land back on the host
+    working_dir: /work
