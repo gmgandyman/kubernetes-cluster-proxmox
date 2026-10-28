@@ -1,0 +1,58 @@
+---
+- name: Install kubeadm prerequisites
+  ansible.builtin.apt:
+    pkg:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - gpg
+
+- name: Create /etc/apt/keyrings if not present
+  ansible.builtin.file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: 0755
+
+- name: Download kubernetes key ring
+  ansible.builtin.get_url:
+    url: https://pkgs.k8s.io/core:/stable:/v{{kubernetes_version}}/deb/Release.key
+    dest: /tmp/k8s-apt-keyring.key
+    mode: '0644'
+
+- name: Dearmor the kubernetes key file
+  ansible.builtin.command: gpg --dearmor -o /etc/apt/keyrings/k8s-apt-keyring.gpg /tmp/k8s-apt-keyring.key
+  args:
+    creates: /etc/apt/keyrings/k8s-apt-keyring.gpg #idempotency check
+
+- name: Remove tmp keyring file
+  ansible.builtin.file:
+    path: /tmp/k8s-apt-keyring.key
+    state: absent
+
+- name: Add Kubernetes repository
+  copy:
+    dest: /etc/apt/sources.list.d/kubernetes.list
+    content: "deb [signed-by=/etc/apt/keyrings/k8s-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v{{kubernetes_version}}/deb/ /"
+
+- name: Install kubeadm packages
+  ansible.builtin.apt:
+    pkg:
+      - kubelet
+      - kubeadm
+      - kubectl
+      - conntrack
+    update_cache: yes
+
+- name: apt-mark hold
+  ansible.builtin.dpkg_selections:
+    name: "{{ item.name }}"
+    selection: hold
+  loop:
+    - { name: kubelet }
+    - { name: kubeadm }
+    - { name: kubectl }
+
+- name: startup kubelet
+  ansible.builtin.systemd_service:
+    name: kubelet
+    state: started

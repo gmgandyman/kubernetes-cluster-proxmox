@@ -1,3 +1,6 @@
+---
+# We disable swap to keep our kubernetes procs running with
+# the memory bounds we set for them
 - name: Disable swap
   command: swapoff -a
   when: ansible_swaptotal_mb > 0

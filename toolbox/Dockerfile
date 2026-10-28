@@ -28,6 +28,7 @@ RUN apt-get update && \
         ca-certificates \
         curl \
         gnupg \
+        iputils-ping \
         lsb-release \
         openssh-client \
         python3 \

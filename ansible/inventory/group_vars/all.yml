@@ -1,2 +1,4 @@
 ansible_user: deploy
 ansible_python_interpreter: /usr/bin/python3
+kubernetes_version: "1.31"
+

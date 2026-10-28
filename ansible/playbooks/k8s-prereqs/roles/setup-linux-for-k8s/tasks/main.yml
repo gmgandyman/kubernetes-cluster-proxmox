@@ -1,3 +1,6 @@
 ---
+- import_tasks: apt-get-update.yml
 - import_tasks: disable-swap.yml
 - import_tasks: setup-iptables-for-flannel-cni.yml
+- import_tasks: setup-containerd.yml
+- import_tasks: install-kubeadm-tools.yml

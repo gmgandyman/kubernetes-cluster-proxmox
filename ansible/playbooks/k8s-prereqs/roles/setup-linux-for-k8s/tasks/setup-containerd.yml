@@ -1,9 +1,9 @@
 ---
+# We aren't using the docker version, just Debian's
 - name: Install containerd
   apt:
     name: containerd
     state: present
-    update_cache: true
 
 - name: Generate default containerd config
   command: containerd config default
