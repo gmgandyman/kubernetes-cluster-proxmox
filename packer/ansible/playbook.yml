@@ -1,0 +1,10 @@
+---
+# Installs kubernetes requirements into the packer image
+# 1. Disable swap, limit us to RAM
+# 2. Install kube tools (kubeadm, kubelet, kubectl, conntrack (flannel cni))
+# 3. containerd runtime
+# 4. prep firewall rules for flannel cni
+- name: Kubernetes node prerequisites
+  hosts: all
+  roles:
+    - setup-linux-for-k8s

@@ -51,4 +51,9 @@ resource "proxmox_virtual_environment_vm" "control_plane" {
   vga {
     type = "serial0"
   }
+
+  # If the template this is based on changes, update this as well
+  lifecycle {
+    replace_triggered_by = [proxmox_virtual_environment_vm.debian_template]
+  }
 }

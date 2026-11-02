@@ -49,4 +49,10 @@ resource "proxmox_virtual_environment_vm" "worker" {
   vga {
     type = "serial0"
   }
+
+  # Cloning only happens at creation time - without this, replacing the template
+  # (see vm-template.tf) wouldn't do anything to a node that already exists.
+  lifecycle {
+    replace_triggered_by = [proxmox_virtual_environment_vm.debian_template]
+  }
 }

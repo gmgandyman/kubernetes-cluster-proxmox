@@ -58,4 +58,9 @@ resource "proxmox_virtual_environment_vm" "debian_template" {
   vga {
     type = "serial0"
   }
+
+  # Proxmox will not update the template based on new file uploads without this
+  lifecycle {
+    replace_triggered_by = [proxmox_virtual_environment_file.debian_custom_image]
+  }
 }

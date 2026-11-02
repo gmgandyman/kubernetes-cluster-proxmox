@@ -11,7 +11,7 @@ k8s installation, though it is only 1 Control Plane + 2 Worker nodes
 ## Provisioning the VMs
 1. ```cp toolbox/.env.example toolbox/.env```
 2. Fill out the variables, ignore TF_VAR_ssh_public_keys for now
-3. ```(docker|podman) compose run --build toolbox bash ```
+3. ```source load-bash-functions.sh``` then ```start-toolbox```
 4. ```cd toolbox/scripts```
 5. ```bash generate-keys.sh```
 6. Fill out the TF_VAR_ssh_public_keys in .env now
@@ -22,13 +22,14 @@ k8s installation, though it is only 1 Control Plane + 2 Worker nodes
 11. ```tofu apply```
 
 ## Kubernetes install
+Node prerequisites (swap, sysctl, containerd, kubeadm/kubelet/kubectl) are already baked into
+the image with packer. That leaves configuration that occurs at boot/runtime on the
+vm
 1. ```eval "$(ssh-agent -s)"```
 2. ```ssh-add /work/keys/admin/admin-ed25519```
 3. ```cd /work/ansible```
-4. ```ansible-playbook playbooks/k8s-prereqs/main.yml```
-5. ```ansible-playbook playbooks/k8s-init/main.yml```
-6. ```ssh -i /work/keys/kubeadmin/kubeadmin-ed25519 kubeadmin@[control-plane-ip-addr]```
-7. ```kubectl get nodes -o wide``` should show your control-plane and 2 worker nodes
+4. ```ansible-playbook playbooks/k8s-init/main.yml```
+6. ```kubectl get nodes -o wide``` should show your control-plane and 2 worker nodes
 
 ## Kubernetes Configuration
 - CRI: containerd
@@ -54,6 +55,19 @@ Because HashiCorp got weird about Terraform source code and licensing, and Open 
 still provision our VMs just as well.
 
 ### Why Ansible
-Kubernetes requires a relatively heavy set of configuration steps for each server you install it on.
-Having this code in an idempotent, repeatable IaC script is very handy, and good for not forgetting
-the steps for configuration.
+Kubernetes requires a relatively heavy set of configuration steps directly after open tofu
+provisions the cluster nodes (VMs). Initialing kubeadm on the control plane, setting up
+the flannel (CNI) manifest, generating the control plane token, and joining the worker nodes
+to the control plane are typically done AFTER provisioning. 
+
+Cluster API can handle this for you, but for a simple 3 node k8s cluster, it's overkill. 
+
+Two bash scripts, one that gets called on the control plane, and another that
+gets called on each worker node, are another option. This is not as easy as it seems though.
+You would have ot ensure the tofu provisioning of the control plane finishes before each worker
+node, stores the join token, and then proceeds to provision each worker node, and hands off the token
+to node as it completes. Tofu was not designed to do this type of work easily.
+
+Ansible can, so this project uses it. A playbook runs once right after all three nodes are provisioned.
+It generates the configuration files, stores the token, copies the token to each worker node as a
+variable, and then pulls down the config file to power the user's kubectl calls from the toolbox. 

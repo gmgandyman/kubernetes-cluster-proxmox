@@ -13,7 +13,7 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 # shellcheck because we're going to write a lot of shell scripts, and linting is nice to have
 # python3-pip because python package manager, and we want ruff for linting our python files
 # ansible.posix because linux operations
-# community.general for the modprobe/misc modules used by the k8s-prereqs playbook
+# community.general for the modprobe/misc modules used by packer/ansible's node-prep role
 # gnupg, apt-transport-https because open tofu
 # qemu-system-x86, qemu-utils for Packer's qemu builder - it shells out to qemu-system-x86_64
 # and qemu-img directly, no container engine/daemon involved. This is what bakes
@@ -53,6 +53,15 @@ RUN curl -fsSL https://apt.releases.hashicorp.com/gpg \
 
 # linting python scripts
 RUN pip install --break-system-packages ruff
+
+# kubectl - the k8s API client, run from here against the cluster instead of SSHing into a node.
+# Pinned to the same minor version as the cluster (KUBERNETES_VERSION) - kubectl's skew policy
+# only tolerates being up to one minor version off from the server, and dl.k8s.io/release/stable.txt
+# always points at the latest release overall, which drifts past that over time.
+ARG KUBERNETES_VERSION
+RUN curl -fsSL -o /usr/local/bin/kubectl \
+      "https://dl.k8s.io/release/$(curl -fsSL https://dl.k8s.io/release/stable-${KUBERNETES_VERSION}.txt)/bin/linux/$(dpkg --print-architecture)/kubectl" && \
+    chmod +x /usr/local/bin/kubectl
 
 # Open Tofu
 # Download the installer script:

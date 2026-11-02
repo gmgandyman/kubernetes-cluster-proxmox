@@ -2,7 +2,10 @@ services:
   toolbox:
     container_name: k8s-proxmox-toolbox
     profiles: [tools]  # setting a profile prevents this from running on up -d
-    build: ./toolbox
+    build:
+      context: ./toolbox
+      args:
+        KUBERNETES_VERSION: ${KUBERNETES_VERSION}   # needs load-bash-functions.sh sourced first
     image: k8s-proxmox-toolbox
     env_file: toolbox/.env   # exports every KEY=VALUE as real env vars inside the container; gitignored, copy from .env.example
     volumes:

@@ -67,9 +67,18 @@ build {
 
         scripts = [
             "${local.debian_base_scripts_dir}/init-apt.sh",
-            "${local.debian_base_scripts_dir}/install-base-packages.sh",
+            "${local.debian_base_scripts_dir}/install-base-packages.sh", # installs python3, needed below
             "${local.debian_base_scripts_dir}/install-sshd.sh",
             "${local.debian_base_scripts_dir}/setup-nopasswd-sudo.sh"
+        ]
+    }
+
+    // Kubernetes node prerequisites (swap, sysctl, containerd, kubeadm/kubelet/kubectl)
+    // are baked into the image here
+    provisioner "ansible" {
+        playbook_file   = "${abspath(path.root)}/ansible/playbook.yml"
+        extra_arguments = [
+            "-e", "kubernetes_version=${var.kubernetes_version}"
         ]
     }
 

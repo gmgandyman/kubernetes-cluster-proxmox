@@ -19,3 +19,8 @@ variable "deploy_private_key_path" {
     type    = string
     default = env("DEPLOY_PRIVATE_KEY_PATH")
 }
+
+variable "kubernetes_version" {
+    type    = string
+    default = env("KUBERNETES_VERSION")
+}
